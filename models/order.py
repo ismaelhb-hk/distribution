@@ -5,34 +5,28 @@ from odoo import models, fields, api
 
 class Order(models.Model):
     _name = 'distribution.order'
-    _description = 'distribution.order'
+    _description = 'Distribution Order'
 
-# Identificador o referencia de la orden
-    name = fields.Char(string='Referencia de Orden', required=True, copy=False, default=lambda self: 'New')
+    # Order identifier or reference
+    name = fields.Char(string='Order Reference', required=True, copy=False)
+
+    date = fields.Datetime(string='Date', default=fields.Datetime.now, required=True)
+
+    status = fields.Char(string='Status', default='pending', required=True)
+
+    total = fields.Float(string='Total', compute='_compute_total')
+
+    pay_method = fields.Char(string='Payment Method')
+
+    address = fields.Text(string='Shipping Address')
 
 
-    fecha = fields.Datetime(string='Fecha', default=fields.Datetime.now, required=True)
+    # Relationships (Foreign Keys)
+    customer_id = fields.Many2one('res.users', string='Customer', required=True)
+    administrator_ids = fields.Many2many('res.users', string='Administrators')
+    item_ids = fields.One2many('distribution.item', 'order', string='Order Items')
 
-    estado = fields.Selection([
-        ('pendiente', 'Pendiente'),
-        ('enviado', 'Enviado'),
-        ('entregado', 'Entregado'),
-        ('cancelado', 'Cancelado')
-    ], string='Estado', default='pendiente', required=True)
-
-    total = fields.Float(string='Total', compute='_compute_total', store=True)
-
-    metodo_pago = fields.Char(string='Método de Pago')
-
-    direccion_envio = fields.Text(string='Dirección de Envío')
-
-    # Clave foránea al cliente (si el cliente es un res.partner de Odoo o un modelo propio)
-    id_cliente = fields.Many2one('res.partner', string='Cliente', required=True)
-
-    # Conexión con los ítems (esto se conecta con el archivo que hará tu compañero del ítem)
-    item_ids = fields.One2many('distribution.order.item', 'id_orden', string='Líneas de Pedido')
-
-    @api.depends('value')
-#     def _value_pc(self):
-#         for record in self:
-#             record.value2 = float(record.value) / 100
+    @api.depends('item_ids.price', 'item_ids.quantity')
+#    def _compute_total(self):
+#        for record in self:
+#            record.total = sum(item.price * item.quantity for item in record.item_ids)
