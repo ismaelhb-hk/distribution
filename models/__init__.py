@@ -3,3 +3,5 @@
 from . import product
 from . import item
 from . import order
+from . import administrator
+from . import customer
