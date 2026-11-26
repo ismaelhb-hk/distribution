@@ -25,8 +25,3 @@ class Order(models.Model):
     customer_id = fields.Many2one('res.users', string='Customer', required=True)
     administrator_ids = fields.Many2many('res.users', string='Administrators')
     item_ids = fields.One2many('distribution.item', 'order', string='Order Items')
-
-    @api.depends('item_ids.price', 'item_ids.quantity')
-#    def _compute_total(self):
-#        for record in self:
-#            record.total = sum(item.price * item.quantity for item in record.item_ids)
